@@ -1,3 +1,4 @@
 deep_sort/git reset HEAD~
 *.pt
 tempCodeRunnerFile.py
+__pycache__/
