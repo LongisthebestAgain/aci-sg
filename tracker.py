@@ -1,7 +1,6 @@
 import cv2
 import torch
 from ultralytics import YOLO
-import video_utils
 
 
 class person_tracker:
@@ -17,12 +16,14 @@ class person_tracker:
         cls_ids_dict = results.names
         person_dict = {}
         for box in results.boxes:
-            track_id = int(box.id.tolist()[0])
-            result = box.xyxy.tolist()[0]
             object_class_id = box.cls.tolist()[0]
             obj_class_name = cls_ids_dict[object_class_id]
 
-            if obj_class_name == "person":
+            if obj_class_name == "person" and box.id is not None:
+                print(box)
+                track_id = int(box.id.tolist()[0])
+                result = box.xyxy.tolist()[0]
+
                 person_dict[track_id] = result
 
         return person_dict
