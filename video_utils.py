@@ -1,6 +1,7 @@
 from cv2 import imshow, waitKey
 import cv2
-
+import serial
+import controller
 import door
 from tracker import person_tracker
 import validator
@@ -22,7 +23,7 @@ def draw_bbox(video_frame, track_id, bbox, color=(0, 255, 0)):
     return video_frame
 
 
-def read_video(file, target_fps=15, target_width=640, target_height=480):
+def read_video(file, arduino, target_fps=15, target_width=640, target_height=480):
     cap = cv2.VideoCapture(file)
 
     # Get original FPS
@@ -30,6 +31,7 @@ def read_video(file, target_fps=15, target_width=640, target_height=480):
     frame_interval = int(original_fps / target_fps)
 
     # Initialize variables
+    light_on = False
     door_coord = []
     intercepted_ppl = set()
     prev_dict = {}
@@ -53,6 +55,17 @@ def read_video(file, target_fps=15, target_width=640, target_height=480):
             process_frame(
                 frame, inside, intercepted_ppl, prev_dict, tracker, door_coord
             )
+            if inside[0] == 0 and light_on:
+                controller.turn_relay_off(arduino)
+                light_on = False
+                print("light_off")
+
+
+            elif inside[0] > 0 and not light_on:
+                controller.turn_relay_on(arduino)
+                light_on = True
+                print("light_on")
+
 
         frame_count += 1
 
@@ -82,8 +95,8 @@ def process_frame(frame, inside, intercepted_ppl, prev_dict, tracker, door_coord
             else (255, 0, 0),
         )
         if validator.do_bboxes_intercept(bbox, door_coord[0]):
-            if tracking_id not in prev_dict.keys() and prev_dict:
-                inside[0] -= 1
+            if tracking_id not in prev_dict.keys():
+                inside[0] = max(inside[0] - 1, 0)
             intercepted_ppl.add(tracking_id)
 
     draw_bbox(frame, "DOOR", door_coord[0], (0, 255, 0))
@@ -105,4 +118,6 @@ def process_frame(frame, inside, intercepted_ppl, prev_dict, tracker, door_coord
         return
 
 
-read_video(0, target_fps=15, target_width=1280, target_height=720)
+ARDUINO = serial.Serial("COM6", 9600, timeout=1)
+
+read_video(0, target_fps=15, target_width=1280, target_height=720, arduino=ARDUINO)

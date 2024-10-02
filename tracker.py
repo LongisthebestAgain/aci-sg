@@ -10,6 +10,7 @@ class person_tracker:
     def detect_frame(self, frame):
         results = self.model.track(
             frame,
+            verbose=False,
             persist=True,
             device="cuda" if torch.cuda.is_available() else "cpu",
         )[0]
@@ -20,7 +21,7 @@ class person_tracker:
             obj_class_name = cls_ids_dict[object_class_id]
 
             if obj_class_name == "person" and box.id is not None:
-                print(box)
+                # print(box)
                 track_id = int(box.id.tolist()[0])
                 result = box.xyxy.tolist()[0]
 
