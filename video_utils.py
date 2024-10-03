@@ -13,7 +13,7 @@ def draw_bbox(video_frame, track_id, bbox, color=(0, 255, 0)):
         video_frame,
         f"ID:{track_id}",
         (int(x1), int(y1) - 10),
-        cv2.FONT_HERSHEY_TRIPLEX,
+        cv2.FONT_HERSHEY_SIMPLEX,
         1,
         color,
         2,
@@ -60,12 +60,10 @@ def read_video(file, arduino, target_fps=15, target_width=640, target_height=480
                 light_on = False
                 print("light_off")
 
-
             elif inside[0] > 0 and not light_on:
                 controller.turn_relay_on(arduino)
                 light_on = True
                 print("light_on")
-
 
         frame_count += 1
 
@@ -75,7 +73,6 @@ def read_video(file, arduino, target_fps=15, target_width=640, target_height=480
 
 def process_frame(frame, inside, intercepted_ppl, prev_dict, tracker, door_coord):
     people_dict = tracker.detect_frame(frame=frame)
-
     for person in list(intercepted_ppl):
         if person not in people_dict.keys():
             inside[0] += 1
@@ -94,6 +91,7 @@ def process_frame(frame, inside, intercepted_ppl, prev_dict, tracker, door_coord
             if validator.do_bboxes_intercept(bbox, door_coord[0])
             else (255, 0, 0),
         )
+
         if validator.do_bboxes_intercept(bbox, door_coord[0]):
             if tracking_id not in prev_dict.keys():
                 inside[0] = max(inside[0] - 1, 0)
@@ -102,10 +100,10 @@ def process_frame(frame, inside, intercepted_ppl, prev_dict, tracker, door_coord
     draw_bbox(frame, "DOOR", door_coord[0], (0, 255, 0))
     cv2.putText(
         frame,
-        f"Inside: {inside}",
-        (20, 20),
-        cv2.FONT_HERSHEY_TRIPLEX,
-        1,
+        f"Inside: {inside[0]}",
+        (50, 75),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        3,
         (255, 255, 255),
         2,
     )
@@ -120,4 +118,6 @@ def process_frame(frame, inside, intercepted_ppl, prev_dict, tracker, door_coord
 
 ARDUINO = serial.Serial("COM6", 9600, timeout=1)
 
-read_video(0, target_fps=15, target_width=1280, target_height=720, arduino=ARDUINO)
+read_video(
+    "jessa.mp4", target_fps=15, target_width=1280, target_height=720, arduino=ARDUINO
+)
