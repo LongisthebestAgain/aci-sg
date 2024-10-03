@@ -49,8 +49,10 @@ def read_video(file, arduino, target_fps=15, target_width=640, target_height=480
 
         # Reduce FPS
         if frame_count % frame_interval == 0:
-            if frame_count == 0:
-                door_coord = door.start(frame)  # do this only once
+            # if frame_count == 0:
+            #     door_coord = door.start(frame)  # do this only once
+            #     print(door_coord)
+            door_coord = [[623, 284, 770, 514]]
 
             process_frame(
                 frame, inside, intercepted_ppl, prev_dict, tracker, door_coord
@@ -119,5 +121,5 @@ def process_frame(frame, inside, intercepted_ppl, prev_dict, tracker, door_coord
 ARDUINO = serial.Serial("COM6", 9600, timeout=1)
 
 read_video(
-    "jessa.mp4", target_fps=15, target_width=1280, target_height=720, arduino=ARDUINO
+    "jes.mp4", target_fps=15, target_width=1280, target_height=720, arduino=ARDUINO
 )
